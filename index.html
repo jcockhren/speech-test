@@ -7,8 +7,74 @@
     <input type="text"/>
     <button>Click me</button>
     <a href="https://google.com">Click Me too!</a>
+       <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+            crossorigin="anonymous">
+    </script>
     <script>
-      alert("hey!");
+      (function(){
+      var API_KEY = "d15c6dfade22463b965c319351b00153";
+      var ACCESS_TOKEN = "";
+      var TEXT = "Hello World!";
+      var mediaSource = new MediaSource();
+      var btnSpeech = document.getElementById("btnSpeech");
+      var speechAudio = document.getElementById("speechAudio");
+      var txtText = document.getElementById("text");
+
+  
+      window.onload = function(){
+        getToken();
+
+        btnSpeech.addEventListener("click", function(){
+          TEXT = txtText.value;
+          getSpeech();
+          getToken();
+        });
+      }
+
+      function getSpeech(){
+
+        var data = "<speak version='1.0' xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang='en-US'>\n<voice  name='Microsoft Server Speech Text to Speech Voice (en-US, JessaRUS)'>\n "+ TEXT + "\n</voice> </speak>";
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "https://eastus.tts.speech.microsoft.com/cognitiveservices/v1");
+
+        xhr.responseType = "blob";
+
+        xhr.onload = function (res) {
+          console.log(xhr.response);
+          var mimeCodec = 'audio/mpeg';
+        var url = window.URL.createObjectURL(xhr.response)
+        console.log(url)
+        speechAudio.src = url;
+        speechAudio.play();
+        };
+
+        xhr.setRequestHeader("content-type", "application/ssml+xml");
+        xhr.setRequestHeader("x-microsoft-outputformat", "audio-16khz-64kbitrate-mono-mp3");
+        xhr.setRequestHeader("authorization", "Bearer " + ACCESS_TOKEN);
+        xhr.send(data);
+      }
+
+      function getToken(){
+        var settings = {
+          "async": true,
+          "crossDomain": true,
+          "url": "https://eastus.api.cognitive.microsoft.com/sts/v1.0/issueToken",
+          "method": "POST",
+          "headers": {
+            "content-type": "application/x-www-form-urlencoded",
+            "ocp-apim-subscription-key": API_KEY
+          },
+          "data": {}
+        }
+
+        $.ajax(settings).done(function (response) {
+          console.log(response);
+          ACCESS_TOKEN = response;
+        });
+      }
+    })()
     </script>
   </body>
 </html>
